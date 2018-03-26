@@ -1,8 +1,9 @@
 {
   "name": "dexter.js",
-  "version": "0.0.2",
+  "version": "0.0.21",
   "description": "nodejs framework for making bots",
   "main": "dist/index.js",
+  "types": "./dist/index.d.ts",
   "scripts": {
     "watch": "npx tsc -p ./ -w",
     "build": "npx tsc -p ./",
