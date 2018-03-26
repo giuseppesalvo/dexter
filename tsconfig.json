@@ -8,7 +8,8 @@
         "declaration": true
     },
     "filesGlob": [
-        "./src/**/*.d.ts"
+        "./src/**/*.d.ts",
+        "./node_modules/**/*.d.ts"
     ],
     "exclude": [
         "node_modules",
