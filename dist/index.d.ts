@@ -1,0 +1,11 @@
+import { Bot as _Bot, Mode as _Mode } from './bot';
+import { ReactorPlugin as _ReactorPlugin, ReactorEvent as _ReactorEvent, ReactorCtx as _ReactorCtx } from './plugin/reactor';
+import { DialogPlugin as _DialogPlugin, DialogEvent as _DialogEvent, DialogCtx as _DialogCtx } from './plugin/dialog';
+export declare const Bot: typeof _Bot;
+export declare const Mode: typeof _Mode;
+export declare const ReactorPlugin: typeof _ReactorPlugin;
+export declare const ReactorEvent: typeof _ReactorEvent;
+export declare type ReactorCtx = _ReactorCtx;
+export declare const DialogPlugin: typeof _DialogPlugin;
+export declare const DialogEvent: typeof _DialogEvent;
+export declare type DialogCtx = _DialogCtx;

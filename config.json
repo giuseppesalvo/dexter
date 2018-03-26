@@ -1,0 +1,7 @@
+{
+	"debug": true,
+	
+	"telegramToken": "507058815:AAGprX-rSWFmDktNyrbj8gQMG1LxuhUrxHg",
+
+	"apiURL": "http://localhost:3000"
+}
