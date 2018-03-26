@@ -1,5 +1,5 @@
 {
-  "name": "dexter",
+  "name": "dexter.js",
   "version": "0.0.1",
   "description": "nodejs framework for making bots",
   "main": "dist/index.js",
