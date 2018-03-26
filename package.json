@@ -10,6 +10,17 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "postinstall": "npm run build"
   },
+  "keywords": [
+    "bot",
+    "nodejs",
+    "bot",
+    "framework",
+    "telegram"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/giuseppesalvo/dexter.git"
+  },
   "author": "Giuseppe Salvo",
   "license": "ISC",
   "dependencies": {
@@ -22,5 +33,9 @@
   "engines": {
     "node": "8.6.0",
     "npm": "5.5.1"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/giuseppesalvo/dexter/issues"
+  },
+  "homepage": "https://github.com/giuseppesalvo/dexter#readme"
 }
