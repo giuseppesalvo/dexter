@@ -45,7 +45,7 @@ export class Bot {
 
 		} else {
 
-			return this.telegraf.getChat(id).then((t_user:any) => {
+			return this.telegraf.telegram.getChat(id).then((t_user:any) => {
 				const user: User = {
 					id: t_user.id,
 					name: t_user.first_name,

@@ -33,7 +33,7 @@ class Bot {
             });
         }
         else {
-            return this.telegraf.getChat(id).then((t_user) => {
+            return this.telegraf.telegram.getChat(id).then((t_user) => {
                 const user = {
                     id: t_user.id,
                     name: t_user.first_name,
