@@ -11,11 +11,11 @@ class MapPluginStorage {
     getSessionByUserId(id) {
         return Promise.resolve(this.sessions[id]);
     }
-    setSessionForUserId(id, state) {
+    setSessionByUserId(id, state) {
         this.sessions[id] = state;
         return Promise.resolve(true);
     }
-    deleteSessionForUserId(id) {
+    deleteSessionByUserId(id) {
         delete this.sessions[id];
         return Promise.resolve(true);
     }

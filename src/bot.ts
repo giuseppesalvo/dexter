@@ -32,6 +32,32 @@ export class Bot {
 
 	}
 
+	public getChatInfo(id: string|number):Promise<User> {
+
+		if ( this.settings.mode === Mode.Debug ) {
+				
+			// In debug mode, id and name are equals
+
+			return Promise.resolve({
+				id: id,
+				name: id,
+			} as User)
+
+		} else {
+
+			return this.telegraf.getChat(id).then((t_user:any) => {
+				const user: User = {
+					id: t_user.id,
+					name: t_user.first_name,
+					telegram: t_user,
+				}
+				return Promise.resolve(user)
+			})
+		
+		}
+
+	}
+
 	public start() {
 
 		if ( this.settings.mode === Mode.Telegram )
@@ -90,15 +116,13 @@ export class Bot {
 
 		this.telegraf = tl
 		
-		tl.start((ctx:any) => {
-			this.pluginsOnInit()
-		})
+		this.pluginsOnInit()
 
 		tl.on('message', (ctx:any) => {
 
 			const user: User = {
 				id:   ctx.message.from.id,
-				name: ctx.message.from.name,
+				name: ctx.message.from.first_name,
 				telegram: ctx.message.from,
 			}
 
@@ -150,16 +174,16 @@ export class Bot {
 
 					console.log(keyboard)
 				}
-
 			}
 
+			return Promise.resolve()
 	
 		} else if ( this.settings.mode === Mode.Telegram ) {
 
 			if ( options ) {
-				this.telegraf.telegram.sendMessage(sender.id, msg, options)
+				return this.telegraf.telegram.sendMessage(sender.id, msg, options)
 			} else {
-				this.telegraf.telegram.sendMessage(sender.id, msg, {
+				return this.telegraf.telegram.sendMessage(sender.id, msg, {
 					reply_markup: {
 						remove_keyboard: true
 					}

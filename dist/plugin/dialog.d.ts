@@ -36,26 +36,27 @@ export declare class DialogPlugin extends BasePlugin implements Plugin {
     resolveOnInit(bot: Bot): Promise<void>;
     resolveOnText(bot: Bot, msg: Message): Promise<void | Session>;
     run(bot: Bot, msg: Message): Promise<void | Session>;
+    runSessionForUserId(bot: Bot, id: string | number): Promise<any>;
     /**
      * Session Methods
      *
      */
     repeatSessionFromCtx(ctx: DialogCtx): Promise<void>;
-    private startSession(bot, msg);
-    endSession(bot: Bot, msg: Message, session: Session): void;
-    private getSession(user);
-    private isSessionRunningForUser(user);
-    private sendQuestionForSession(session, bot, msg);
+    private startSession(bot, user);
+    endSession(bot: Bot, user: User, session: Session): void;
+    private getSessionByUserId(id);
+    private isSessionRunningForUser(id);
+    private sendQuestionForSession(session, bot, user, msg?);
     /**
      * Timeout methods
      *
      */
     private clearExpireTimeoutToSession(session, bot);
-    private setExpireTimeoutToSession(session, bot);
+    private setExpireTimeoutToSession(session, bot, user);
     /**
      * Interval methods
      *
      */
     private clearRemindIntervalToSession(session, bot);
-    private setRemindIntervalToSession(session, bot);
+    private setRemindIntervalToSession(session, bot, user);
 }

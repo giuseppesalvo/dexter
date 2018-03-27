@@ -4,8 +4,8 @@ import { Session } from "./session";
  */
 export interface Storage {
     getSessionByUserId(id: number | string): Promise<Session>;
-    setSessionForUserId(id: number | string, state: Session): Promise<boolean>;
-    deleteSessionForUserId(id: number | string): Promise<boolean>;
+    setSessionByUserId(id: number | string, state: Session): Promise<boolean>;
+    deleteSessionByUserId(id: number | string): Promise<boolean>;
 }
 /**
  * In memory storage with map[string]*Session
@@ -14,6 +14,6 @@ export interface Storage {
 export declare class MapPluginStorage implements Storage {
     sessions: any;
     getSessionByUserId(id: number | string): Promise<Session>;
-    setSessionForUserId(id: number | string, state: Session): Promise<boolean>;
-    deleteSessionForUserId(id: number | string): Promise<boolean>;
+    setSessionByUserId(id: number | string, state: Session): Promise<boolean>;
+    deleteSessionByUserId(id: number | string): Promise<boolean>;
 }

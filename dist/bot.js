@@ -24,6 +24,25 @@ class Bot {
         this.plugins = [];
         this.plugins = this.settings.plugins || [];
     }
+    getChatInfo(id) {
+        if (this.settings.mode === Mode.Debug) {
+            // In debug mode, id and name are equals
+            return Promise.resolve({
+                id: id,
+                name: id,
+            });
+        }
+        else {
+            return this.telegraf.getChat(id).then((t_user) => {
+                const user = {
+                    id: t_user.id,
+                    name: t_user.first_name,
+                    telegram: t_user,
+                };
+                return Promise.resolve(user);
+            });
+        }
+    }
     start() {
         if (this.settings.mode === Mode.Telegram)
             return this.startTelegram();
@@ -66,13 +85,11 @@ class Bot {
     startTelegram() {
         const tl = new Telegraf(this.settings.token);
         this.telegraf = tl;
-        tl.start((ctx) => {
-            this.pluginsOnInit();
-        });
+        this.pluginsOnInit();
         tl.on('message', (ctx) => {
             const user = {
                 id: ctx.message.from.id,
-                name: ctx.message.from.name,
+                name: ctx.message.from.first_name,
                 telegram: ctx.message.from,
             };
             const msg = {
@@ -113,13 +130,14 @@ class Bot {
                     console.log(keyboard);
                 }
             }
+            return Promise.resolve();
         }
         else if (this.settings.mode === Mode.Telegram) {
             if (options) {
-                this.telegraf.telegram.sendMessage(sender.id, msg, options);
+                return this.telegraf.telegram.sendMessage(sender.id, msg, options);
             }
             else {
-                this.telegraf.telegram.sendMessage(sender.id, msg, {
+                return this.telegraf.telegram.sendMessage(sender.id, msg, {
                     reply_markup: {
                         remove_keyboard: true
                     }

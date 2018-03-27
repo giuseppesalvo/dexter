@@ -14,11 +14,12 @@ export declare class Bot {
     plugins: Plugin[];
     telegraf: any;
     constructor(settings: Settings);
+    getChatInfo(id: string | number): Promise<User>;
     start(): void | Promise<void>;
     startDebug(): Promise<void>;
     private startTelegram();
     private arePluginsOk();
     private pluginsOnInit();
     private pluginsOnText(msg);
-    sendMessage(msg: string, sender: User, options?: any | null): void;
+    sendMessage(msg: string, sender: User, options?: any | null): any;
 }

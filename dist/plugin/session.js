@@ -9,7 +9,7 @@ class Session {
         this.running = false;
     }
     end(ctx) {
-        ctx.plugin.endSession(ctx.bot, ctx.message, this);
+        ctx.plugin.endSession(ctx.bot, ctx.sender, this);
     }
     goBack(ctx) {
         this.stateIndex -= 1;

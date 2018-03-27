@@ -57,7 +57,7 @@ export class DialogPlugin extends BasePlugin implements Plugin {
 	}
 
 	async resolveOnText(bot: Bot, msg: Message) {
-		const isRunning = await this.isSessionRunningForUser(msg.sender)
+		const isRunning = await this.isSessionRunningForUser(msg.sender.id)
 		if ( this.checkTrigger(this.settings.trigger, msg.text) || isRunning ) {
 			return this.run(bot, msg)
 		}
@@ -66,25 +66,55 @@ export class DialogPlugin extends BasePlugin implements Plugin {
 
 	run(bot: Bot, msg: Message) {
 
+		console.log('running')
+
 		return Promise.all([
 			
-			this.getSession(msg.sender),
-			this.isSessionRunningForUser(msg.sender),
+			this.getSessionByUserId(msg.sender.id),
+			this.isSessionRunningForUser(msg.sender.id),
 
 		]).then(async args => {
 
 			const session   = args[0] as Session
 			const isRunning = args[1] as boolean
 
-			this.setRemindIntervalToSession(session, bot)
-			this.setExpireTimeoutToSession(session, bot)
+			this.setRemindIntervalToSession(session, bot, msg.sender)
+			this.setExpireTimeoutToSession(session, bot, msg.sender)
 	
 			if ( !isRunning ) {
-				return this.startSession(bot, msg)
+				return this.startSession(bot, msg.sender)
 			} else {
-				this.sendQuestionForSession(session, bot, msg)
+				this.sendQuestionForSession(session, bot, msg.sender, msg)
 				return Promise.resolve()
 			}
+		
+		})
+	}
+
+	runSessionForUserId( bot:Bot, id:string|number ): Promise<any> {
+
+		return Promise.all([
+				
+			bot.getChatInfo(id),
+			this.getSessionByUserId(id),
+			this.isSessionRunningForUser(id),
+
+		]).then(async args => {
+
+			const user 		= args[0] as User
+			const session   = args[1] as Session
+			const isRunning = args[2] as boolean
+
+			this.setRemindIntervalToSession(session, bot, user)
+			this.setExpireTimeoutToSession(session, bot, user)
+	
+			if ( !isRunning ) {
+				return this.startSession(bot, user)
+			} else {
+				console.log('session is already running')
+				return Promise.resolve()
+			}
+		
 		})
 	}
 
@@ -94,27 +124,26 @@ export class DialogPlugin extends BasePlugin implements Plugin {
 	 */
 
 	async repeatSessionFromCtx( ctx: DialogCtx ) {
-		const session = await this.getSession(ctx.sender)
-		this.sendQuestionForSession(session, ctx.bot, ctx.message)
+		const session = await this.getSessionByUserId(ctx.sender.id)
+		this.sendQuestionForSession(session, ctx.bot, ctx.sender, ctx.message)
 	}
 
-	private async startSession(bot: Bot, msg: Message) {
-		const session = await this.getSession(msg.sender)
+	private async startSession(bot: Bot, user: User) {
+		const session = await this.getSessionByUserId(user.id)
 		session.running = true
 
 		this.emit( DialogEvent.SessionStart, {
 			plugin: this,
 			bot: bot,
-			sender: msg.sender,
-			message: msg,
+			sender: user,
 			session: session,
 		} as DialogCtx)
 
-		this.sendQuestionForSession(session, bot, msg)
+		this.sendQuestionForSession(session, bot, user)
 		return session
 	}
 
-	endSession(bot: Bot, msg: Message, session: Session) {
+	endSession(bot: Bot, user: User, session: Session) {
 
 		this.clearRemindIntervalToSession(session, bot)
 		this.clearExpireTimeoutToSession(session, bot)
@@ -122,38 +151,37 @@ export class DialogPlugin extends BasePlugin implements Plugin {
 		this.emit( DialogEvent.SessionEnd, {
 			plugin: this,
 			bot: bot,
-			sender: msg.sender,
-			message: msg,
+			sender: user,
 			session: session,
 		} as DialogCtx)
 
-		this.storage.deleteSessionForUserId(msg.sender.id)
+		this.storage.deleteSessionByUserId(user.id)
 	}
 
-	private async getSession(user: User): Promise<Session> {
-		const session = await this.storage.getSessionByUserId(user.id)
+	private async getSessionByUserId(id: string|number): Promise<Session> {
+		const session = await this.storage.getSessionByUserId(id)
 
 		if ( session ) {
 			return session
 		} else {
-			const session = new Session(user.id)
-			await this.storage.setSessionForUserId(user.id, session)
+			const session = new Session(id)
+			await this.storage.setSessionByUserId(id, session)
 			return session
 		}
 	}
 
-	private async isSessionRunningForUser(user: User): Promise<boolean> {
-		const session = await this.storage.getSessionByUserId(user.id)
+	private async isSessionRunningForUser(id: string|number): Promise<boolean> {
+		const session = await this.storage.getSessionByUserId(id)
 		return !!session && session.running
 	}
 
-	private sendQuestionForSession(session: Session, bot: Bot, msg: Message) {
+	private sendQuestionForSession(session: Session, bot: Bot, user: User, msg: Message|null = null) {
 		const state = this.settings.states[session.stateIndex]
 		
 		const ctx = {
 			plugin: this,
 			bot: bot,
-			sender: msg.sender,
+			sender: user,
 			session: session,
 			message: msg,
 		} as DialogCtx
@@ -172,7 +200,7 @@ export class DialogPlugin extends BasePlugin implements Plugin {
 		clearTimeout(session.expireTimeout)
 	}
 
-	private setExpireTimeoutToSession( session: Session, bot: Bot ) {
+	private setExpireTimeoutToSession( session: Session, bot: Bot, user: User ) {
 		if ( this.settings.expireAfter > 0 ) {
 
 			this.clearExpireTimeoutToSession(session, bot)
@@ -185,9 +213,10 @@ export class DialogPlugin extends BasePlugin implements Plugin {
 					plugin: this,
 					bot: bot,
 					session: session,
+					sender: user,
 				} as DialogCtx)
 
-				this.storage.deleteSessionForUserId(session.userId)
+				this.storage.deleteSessionByUserId(session.userId)
 
 			}, this.settings.expireAfter)
 		}
@@ -202,7 +231,7 @@ export class DialogPlugin extends BasePlugin implements Plugin {
 		clearInterval(session.remindInterval)
 	}
 
-	private setRemindIntervalToSession( session: Session, bot: Bot ) {
+	private setRemindIntervalToSession( session: Session, bot: Bot, user: User ) {
 		if ( this.settings.remindEvery > 0 ) {
 
 			this.clearRemindIntervalToSession(session, bot)
@@ -213,6 +242,7 @@ export class DialogPlugin extends BasePlugin implements Plugin {
 					plugin: this,
 					bot: bot,
 					session: session,
+					sender: user,
 				} as DialogCtx)
 
 			}, this.settings.remindEvery)

@@ -6,8 +6,8 @@ import { Session } from "./session"
 
 export interface Storage {
 	getSessionByUserId(id: number|string): Promise<Session>
-	setSessionForUserId(id: number|string, state: Session): Promise<boolean>
-	deleteSessionForUserId(id: number|string): Promise<boolean>
+	setSessionByUserId(id: number|string, state: Session): Promise<boolean>
+	deleteSessionByUserId(id: number|string): Promise<boolean>
 }
 
 /**
@@ -23,12 +23,12 @@ export class MapPluginStorage implements Storage {
 		return Promise.resolve(this.sessions[id])
 	}
 	
-	setSessionForUserId(id: number|string, state: Session): Promise<boolean> {
+	setSessionByUserId(id: number|string, state: Session): Promise<boolean> {
 		this.sessions[id] = state
 		return Promise.resolve(true)
 	}
 	
-	deleteSessionForUserId(id: number|string): Promise<boolean> {
+	deleteSessionByUserId(id: number|string): Promise<boolean> {
 		delete this.sessions[id]
 		return Promise.resolve(true)
 	}

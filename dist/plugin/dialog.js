@@ -35,7 +35,7 @@ class DialogPlugin extends base_1.BasePlugin {
     }
     resolveOnText(bot, msg) {
         return __awaiter(this, void 0, void 0, function* () {
-            const isRunning = yield this.isSessionRunningForUser(msg.sender);
+            const isRunning = yield this.isSessionRunningForUser(msg.sender.id);
             if (this.checkTrigger(this.settings.trigger, msg.text) || isRunning) {
                 return this.run(bot, msg);
             }
@@ -43,19 +43,40 @@ class DialogPlugin extends base_1.BasePlugin {
         });
     }
     run(bot, msg) {
+        console.log('running');
         return Promise.all([
-            this.getSession(msg.sender),
-            this.isSessionRunningForUser(msg.sender),
+            this.getSessionByUserId(msg.sender.id),
+            this.isSessionRunningForUser(msg.sender.id),
         ]).then((args) => __awaiter(this, void 0, void 0, function* () {
             const session = args[0];
             const isRunning = args[1];
-            this.setRemindIntervalToSession(session, bot);
-            this.setExpireTimeoutToSession(session, bot);
+            this.setRemindIntervalToSession(session, bot, msg.sender);
+            this.setExpireTimeoutToSession(session, bot, msg.sender);
             if (!isRunning) {
-                return this.startSession(bot, msg);
+                return this.startSession(bot, msg.sender);
             }
             else {
-                this.sendQuestionForSession(session, bot, msg);
+                this.sendQuestionForSession(session, bot, msg.sender, msg);
+                return Promise.resolve();
+            }
+        }));
+    }
+    runSessionForUserId(bot, id) {
+        return Promise.all([
+            bot.getChatInfo(id),
+            this.getSessionByUserId(id),
+            this.isSessionRunningForUser(id),
+        ]).then((args) => __awaiter(this, void 0, void 0, function* () {
+            const user = args[0];
+            const session = args[1];
+            const isRunning = args[2];
+            this.setRemindIntervalToSession(session, bot, user);
+            this.setExpireTimeoutToSession(session, bot, user);
+            if (!isRunning) {
+                return this.startSession(bot, user);
+            }
+            else {
+                console.log('session is already running');
                 return Promise.resolve();
             }
         }));
@@ -66,62 +87,60 @@ class DialogPlugin extends base_1.BasePlugin {
      */
     repeatSessionFromCtx(ctx) {
         return __awaiter(this, void 0, void 0, function* () {
-            const session = yield this.getSession(ctx.sender);
-            this.sendQuestionForSession(session, ctx.bot, ctx.message);
+            const session = yield this.getSessionByUserId(ctx.sender.id);
+            this.sendQuestionForSession(session, ctx.bot, ctx.sender, ctx.message);
         });
     }
-    startSession(bot, msg) {
+    startSession(bot, user) {
         return __awaiter(this, void 0, void 0, function* () {
-            const session = yield this.getSession(msg.sender);
+            const session = yield this.getSessionByUserId(user.id);
             session.running = true;
             this.emit(DialogEvent.SessionStart, {
                 plugin: this,
                 bot: bot,
-                sender: msg.sender,
-                message: msg,
+                sender: user,
                 session: session,
             });
-            this.sendQuestionForSession(session, bot, msg);
+            this.sendQuestionForSession(session, bot, user);
             return session;
         });
     }
-    endSession(bot, msg, session) {
+    endSession(bot, user, session) {
         this.clearRemindIntervalToSession(session, bot);
         this.clearExpireTimeoutToSession(session, bot);
         this.emit(DialogEvent.SessionEnd, {
             plugin: this,
             bot: bot,
-            sender: msg.sender,
-            message: msg,
+            sender: user,
             session: session,
         });
-        this.storage.deleteSessionForUserId(msg.sender.id);
+        this.storage.deleteSessionByUserId(user.id);
     }
-    getSession(user) {
+    getSessionByUserId(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            const session = yield this.storage.getSessionByUserId(user.id);
+            const session = yield this.storage.getSessionByUserId(id);
             if (session) {
                 return session;
             }
             else {
-                const session = new session_1.Session(user.id);
-                yield this.storage.setSessionForUserId(user.id, session);
+                const session = new session_1.Session(id);
+                yield this.storage.setSessionByUserId(id, session);
                 return session;
             }
         });
     }
-    isSessionRunningForUser(user) {
+    isSessionRunningForUser(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            const session = yield this.storage.getSessionByUserId(user.id);
+            const session = yield this.storage.getSessionByUserId(id);
             return !!session && session.running;
         });
     }
-    sendQuestionForSession(session, bot, msg) {
+    sendQuestionForSession(session, bot, user, msg = null) {
         const state = this.settings.states[session.stateIndex];
         const ctx = {
             plugin: this,
             bot: bot,
-            sender: msg.sender,
+            sender: user,
             session: session,
             message: msg,
         };
@@ -135,7 +154,7 @@ class DialogPlugin extends base_1.BasePlugin {
     clearExpireTimeoutToSession(session, bot) {
         clearTimeout(session.expireTimeout);
     }
-    setExpireTimeoutToSession(session, bot) {
+    setExpireTimeoutToSession(session, bot, user) {
         if (this.settings.expireAfter > 0) {
             this.clearExpireTimeoutToSession(session, bot);
             session.expireTimeout = setTimeout(() => {
@@ -144,8 +163,9 @@ class DialogPlugin extends base_1.BasePlugin {
                     plugin: this,
                     bot: bot,
                     session: session,
+                    sender: user,
                 });
-                this.storage.deleteSessionForUserId(session.userId);
+                this.storage.deleteSessionByUserId(session.userId);
             }, this.settings.expireAfter);
         }
     }
@@ -156,7 +176,7 @@ class DialogPlugin extends base_1.BasePlugin {
     clearRemindIntervalToSession(session, bot) {
         clearInterval(session.remindInterval);
     }
-    setRemindIntervalToSession(session, bot) {
+    setRemindIntervalToSession(session, bot, user) {
         if (this.settings.remindEvery > 0) {
             this.clearRemindIntervalToSession(session, bot);
             session.remindInterval = setInterval(() => {
@@ -164,6 +184,7 @@ class DialogPlugin extends base_1.BasePlugin {
                     plugin: this,
                     bot: bot,
                     session: session,
+                    sender: user,
                 });
             }, this.settings.remindEvery);
         }
