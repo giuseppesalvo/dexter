@@ -19,7 +19,7 @@ import {
 
 const bot = new Bot({
     token: Config.telegramToken,
-    mode: Mode.Debug,
+    mode: Mode.Debug, // Or Mode.Telegram
     plugins: [ MyPlugin, AnotherPlugin ]
 })
 
