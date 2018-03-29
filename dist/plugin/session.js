@@ -13,7 +13,7 @@ class Session {
     }
     goBack(ctx) {
         this.stateIndex -= 1;
-        ctx.plugin.run(ctx.bot, ctx.message);
+        ctx.plugin.run(ctx.bot, ctx.sender, ctx.message);
     }
     error(ctx) {
         // do nothing for now
@@ -23,7 +23,7 @@ class Session {
     }
     goTo(ctx, index) {
         this.stateIndex = index;
-        ctx.plugin.run(ctx.bot, ctx.message);
+        ctx.plugin.run(ctx.bot, ctx.sender, ctx.message);
     }
     goToStart(ctx) {
         this.goTo(ctx, 0);
@@ -36,7 +36,7 @@ class Session {
     }
     skipToNext(ctx) {
         this.stateIndex += 1;
-        ctx.plugin.run(ctx.bot, ctx.message);
+        ctx.plugin.run(ctx.bot, ctx.sender, ctx.message);
     }
 }
 exports.Session = Session;

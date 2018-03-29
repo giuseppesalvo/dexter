@@ -59,32 +59,30 @@ export class DialogPlugin extends BasePlugin implements Plugin {
 	async resolveOnText(bot: Bot, msg: Message) {
 		const isRunning = await this.isSessionRunningForUser(msg.sender.id)
 		if ( this.checkTrigger(this.settings.trigger, msg.text) || isRunning ) {
-			return this.run(bot, msg)
+			return this.run(bot, msg.sender, msg)
 		}
 		return Promise.resolve()
 	}
 
-	run(bot: Bot, msg: Message) {
-
-		console.log('running')
+	run(bot: Bot, user: User, msg: Message) {
 
 		return Promise.all([
 			
-			this.getSessionByUserId(msg.sender.id),
-			this.isSessionRunningForUser(msg.sender.id),
+			this.getSessionByUserId(user.id),
+			this.isSessionRunningForUser(user.id),
 
 		]).then(async args => {
 
 			const session   = args[0] as Session
 			const isRunning = args[1] as boolean
 
-			this.setRemindIntervalToSession(session, bot, msg.sender)
-			this.setExpireTimeoutToSession(session, bot, msg.sender)
+			this.setRemindIntervalToSession(session, bot, user)
+			this.setExpireTimeoutToSession(session, bot, user)
 	
 			if ( !isRunning ) {
-				return this.startSession(bot, msg.sender)
+				return this.startSession(bot, user)
 			} else {
-				this.sendQuestionForSession(session, bot, msg.sender, msg)
+				this.sendQuestionForSession(session, bot, user, msg)
 				return Promise.resolve()
 			}
 		

@@ -27,7 +27,7 @@ export class Session {
 
 	goBack( ctx: DialogCtx ) {
 		this.stateIndex -= 1
-		ctx.plugin.run(ctx.bot, ctx.message)
+		ctx.plugin.run(ctx.bot, ctx.sender, ctx.message)
 	}
 
 	error( ctx: DialogCtx ) {
@@ -40,7 +40,7 @@ export class Session {
 
 	goTo( ctx: DialogCtx, index: number ) {
 		this.stateIndex = index
-		ctx.plugin.run(ctx.bot, ctx.message)
+		ctx.plugin.run(ctx.bot, ctx.sender, ctx.message)
 	}
 
 	goToStart( ctx: DialogCtx ) {
@@ -57,7 +57,7 @@ export class Session {
 
 	skipToNext( ctx: DialogCtx ) {
 		this.stateIndex += 1
-		ctx.plugin.run(ctx.bot, ctx.message)
+		ctx.plugin.run(ctx.bot, ctx.sender, ctx.message)
 	}
 
 }

@@ -37,26 +37,25 @@ class DialogPlugin extends base_1.BasePlugin {
         return __awaiter(this, void 0, void 0, function* () {
             const isRunning = yield this.isSessionRunningForUser(msg.sender.id);
             if (this.checkTrigger(this.settings.trigger, msg.text) || isRunning) {
-                return this.run(bot, msg);
+                return this.run(bot, msg.sender, msg);
             }
             return Promise.resolve();
         });
     }
-    run(bot, msg) {
-        console.log('running');
+    run(bot, user, msg) {
         return Promise.all([
-            this.getSessionByUserId(msg.sender.id),
-            this.isSessionRunningForUser(msg.sender.id),
+            this.getSessionByUserId(user.id),
+            this.isSessionRunningForUser(user.id),
         ]).then((args) => __awaiter(this, void 0, void 0, function* () {
             const session = args[0];
             const isRunning = args[1];
-            this.setRemindIntervalToSession(session, bot, msg.sender);
-            this.setExpireTimeoutToSession(session, bot, msg.sender);
+            this.setRemindIntervalToSession(session, bot, user);
+            this.setExpireTimeoutToSession(session, bot, user);
             if (!isRunning) {
-                return this.startSession(bot, msg.sender);
+                return this.startSession(bot, user);
             }
             else {
-                this.sendQuestionForSession(session, bot, msg.sender, msg);
+                this.sendQuestionForSession(session, bot, user, msg);
                 return Promise.resolve();
             }
         }));

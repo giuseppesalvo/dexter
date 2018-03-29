@@ -35,7 +35,7 @@ export declare class DialogPlugin extends BasePlugin implements Plugin {
     constructor(settings: DialogSettings);
     resolveOnInit(bot: Bot): Promise<void>;
     resolveOnText(bot: Bot, msg: Message): Promise<void | Session>;
-    run(bot: Bot, msg: Message): Promise<void | Session>;
+    run(bot: Bot, user: User, msg: Message): Promise<void | Session>;
     runSessionForUserId(bot: Bot, id: string | number): Promise<any>;
     /**
      * Session Methods
