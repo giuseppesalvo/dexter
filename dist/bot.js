@@ -123,7 +123,7 @@ class Bot {
         if (this.settings.mode === Mode.Debug) {
             console.log("🤖: " + msg);
             if (options) {
-                if (options.reply_markup) {
+                if (options.reply_markup && options.reply_markup.keyboard) {
                     const keyboard = options.reply_markup.keyboard.map((v) => {
                         return "[" + v.join(", ") + "]";
                     }).join("\n");

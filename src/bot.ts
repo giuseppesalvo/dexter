@@ -167,7 +167,7 @@ export class Bot {
 		
 			if ( options ) {
 
-				if ( options.reply_markup ) {
+				if ( options.reply_markup && options.reply_markup.keyboard ) {
 					const keyboard = options.reply_markup.keyboard.map((v:any) => {
 						return "[" + v.join(", ") + "]"
 					}).join("\n")
