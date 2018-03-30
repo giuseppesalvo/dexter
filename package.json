@@ -30,10 +30,6 @@
   "devDependencies": {
     "typescript": "^2.7.2"
   },
-  "engines": {
-    "node": "8.6.0",
-    "npm": "5.5.1"
-  },
   "bugs": {
     "url": "https://github.com/giuseppesalvo/dexter/issues"
   },
