@@ -35,7 +35,7 @@ import {
     ReactorEvent,
 } from 'dexter.js'
 
-export const Hello: any = new ReactorPlugin({
+export const Hello = new ReactorPlugin({
     name: "hello",
     trigger: "hello",
 })
@@ -90,7 +90,7 @@ const States = [
 
 ]
 
-export const Color: any = new DialogPlugin({
+export const Color = new DialogPlugin({
     name: "color",
     trigger: "/color",
     states: States,
